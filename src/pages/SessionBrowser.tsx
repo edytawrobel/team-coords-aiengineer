@@ -5,7 +5,7 @@ import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
 import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, User, UserPlus, GridIcon, ListBulletIcon as ListIcon, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
