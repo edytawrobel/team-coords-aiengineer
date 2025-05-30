@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 import { AppState, Attendance, TeamMember, Session, Summary } from '../types';
 import { fetchSessions } from '../utils/api';
+import { saveState, loadState } from '../utils/supabase';
 
 type AppAction =
   | { type: 'SET_SESSIONS'; payload: AppState['sessions'] }
@@ -15,7 +16,8 @@ type AppAction =
   | { type: 'DELETE_SESSION'; payload: string }
   | { type: 'ADD_SUMMARY'; payload: Summary }
   | { type: 'REMOVE_SUMMARY'; payload: string }
-  | { type: 'SET_SUMMARIES'; payload: Summary[] };
+  | { type: 'SET_SUMMARIES'; payload: Summary[] }
+  | { type: 'LOAD_STATE'; payload: AppState };
 
 const initialState: AppState = {
   team: [],
@@ -24,29 +26,12 @@ const initialState: AppState = {
   summaries: [],
 };
 
-const loadInitialState = (): AppState => {
-  try {
-    const savedState = localStorage.getItem('conferenceAppState');
-    if (!savedState) return initialState;
-
-    const parsedState = JSON.parse(savedState);
-    return {
-      ...initialState,
-      team: parsedState.team || [],
-      attendance: parsedState.attendance || [],
-      sessions: parsedState.sessions || [],
-      summaries: parsedState.summaries || [],
-    };
-  } catch (error) {
-    console.error('Failed to load state from localStorage:', error);
-    return initialState;
-  }
-};
-
 const appReducer = (state: AppState, action: AppAction): AppState => {
+  let newState: AppState;
+  
   switch (action.type) {
     case 'SET_SESSIONS':
-      return {
+      newState = {
         ...state,
         sessions: [...action.payload, ...state.sessions.filter(s => s.isCustom)],
         attendance: state.attendance.filter(a => 
@@ -54,25 +39,37 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
           state.sessions.some(s => s.isCustom && s.id === a.sessionId)
         ),
       };
+      break;
+      
     case 'SET_TEAM':
-      return { ...state, team: action.payload };
+      newState = { ...state, team: action.payload };
+      break;
+      
     case 'ADD_TEAM_MEMBER':
-      return { ...state, team: [...state.team, action.payload] };
+      newState = { ...state, team: [...state.team, action.payload] };
+      break;
+      
     case 'REMOVE_TEAM_MEMBER':
-      return {
+      newState = {
         ...state,
         team: state.team.filter((member) => member.id !== action.payload),
         attendance: state.attendance.filter((a) => a.memberId !== action.payload),
       };
+      break;
+      
     case 'UPDATE_TEAM_MEMBER':
-      return {
+      newState = {
         ...state,
         team: state.team.map((member) =>
           member.id === action.payload.id ? action.payload : member
         ),
       };
+      break;
+      
     case 'SET_ATTENDANCE':
-      return { ...state, attendance: action.payload };
+      newState = { ...state, attendance: action.payload };
+      break;
+      
     case 'TOGGLE_ATTENDANCE': {
       const { sessionId, memberId } = action.payload;
       const existingIndex = state.attendance.findIndex(
@@ -80,54 +77,76 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       );
 
       if (existingIndex >= 0) {
-        return {
+        newState = {
           ...state,
           attendance: state.attendance.filter((_, i) => i !== existingIndex),
         };
       } else {
-        return {
+        newState = {
           ...state,
           attendance: [...state.attendance, action.payload],
         };
       }
+      break;
     }
+      
     case 'ADD_SESSION':
-      return {
+      newState = {
         ...state,
         sessions: [...state.sessions, action.payload],
       };
+      break;
+      
     case 'UPDATE_SESSION':
-      return {
+      newState = {
         ...state,
         sessions: state.sessions.map((session) =>
           session.id === action.payload.id ? action.payload : session
         ),
       };
+      break;
+      
     case 'DELETE_SESSION':
-      return {
+      newState = {
         ...state,
         sessions: state.sessions.filter((session) => session.id !== action.payload),
         attendance: state.attendance.filter((a) => a.sessionId !== action.payload),
         summaries: state.summaries.filter((s) => s.sessionId !== action.payload),
       };
+      break;
+      
     case 'ADD_SUMMARY':
-      return {
+      newState = {
         ...state,
         summaries: [...state.summaries, action.payload],
       };
+      break;
+      
     case 'REMOVE_SUMMARY':
-      return {
+      newState = {
         ...state,
         summaries: state.summaries.filter((summary) => summary.id !== action.payload),
       };
+      break;
+      
     case 'SET_SUMMARIES':
-      return {
+      newState = {
         ...state,
         summaries: action.payload,
       };
+      break;
+      
+    case 'LOAD_STATE':
+      newState = action.payload;
+      break;
+      
     default:
       return state;
   }
+  
+  // Save state to Supabase after each change
+  saveState(newState);
+  return newState;
 };
 
 interface AppContextValue {
@@ -138,22 +157,26 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(appReducer, loadInitialState());
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
-    localStorage.setItem('conferenceAppState', JSON.stringify(state));
-  }, [state]);
-
-  useEffect(() => {
-    const loadSessions = async () => {
+    const initializeState = async () => {
       try {
+        // Load state from Supabase
+        const savedState = await loadState();
+        if (savedState) {
+          dispatch({ type: 'LOAD_STATE', payload: savedState });
+        }
+        
+        // Fetch sessions
         const sessions = await fetchSessions();
         dispatch({ type: 'SET_SESSIONS', payload: sessions });
       } catch (error) {
-        console.error('Failed to fetch sessions:', error);
+        console.error('Failed to initialize state:', error);
       }
     };
-    loadSessions();
+    
+    initializeState();
   }, []);
 
   return <AppContext.Provider value={{ state, dispatch }}>{children}</AppContext.Provider>;
