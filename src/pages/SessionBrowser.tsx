@@ -5,7 +5,7 @@ import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
 import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListBulletIcon, Plus } from 'lucide-react';
+import { Calendar, Filter, User, UserPlus, GridIcon, ListBulletIcon as ListIcon, Plus, Trash2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
@@ -88,6 +88,14 @@ export const SessionBrowser: React.FC = () => {
     dispatch({ type: 'ADD_SUMMARY', payload: summary });
     setIsAddingSummary(false);
   };
+
+  const handleDeleteSession = (sessionId: string) => {
+    if (window.confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+      dispatch({ type: 'DELETE_SESSION', payload: sessionId });
+      setSelectedSessionId(null);
+      navigate(`/sessions?day=${activeDay}&view=${viewMode}`, { replace: true });
+    }
+  };
   
   const selectedSession = selectedSessionId
     ? sessions.find(session => session.id === selectedSessionId)
@@ -108,6 +116,8 @@ export const SessionBrowser: React.FC = () => {
   const currentMemberSummary = selectedSession && currentMemberId
     ? summaries.find(s => s.sessionId === selectedSession.id && s.authorId === currentMemberId)
     : null;
+
+  const canDeleteSession = selectedSession?.isCustom && selectedSession?.createdBy === currentMemberId;
   
   return (
     <div className="container mx-auto">
@@ -140,7 +150,7 @@ export const SessionBrowser: React.FC = () => {
                       }
                     `}
                   >
-                    <ListBulletIcon size={16} />
+                    <ListIcon size={16} />
                   </button>
                   <button
                     onClick={() => handleViewModeChange('calendar')}
@@ -246,9 +256,20 @@ export const SessionBrowser: React.FC = () => {
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex justify-between items-start">
                   <h2 className="text-xl font-bold text-gray-900 pr-4">{selectedSession.title}</h2>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                    {selectedSession.track}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      {selectedSession.track}
+                    </span>
+                    {canDeleteSession && (
+                      <button
+                        onClick={() => handleDeleteSession(selectedSession.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
+                        title="Delete session"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <p className="mt-1 text-sm text-gray-500">
