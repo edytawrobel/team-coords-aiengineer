@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { AppState } from '../types';
 
-const supabaseUrl = 'https://xyzcompany.supabase.co';
-const supabaseKey = 'your-supabase-anon-key';
+const supabaseUrl = 'https://etfwlzsdlddbswulqpqk.supabase.co';
+const supabaseKey = 'your-supabase-anon-key'; // TODO: Replace with actual anon key
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
