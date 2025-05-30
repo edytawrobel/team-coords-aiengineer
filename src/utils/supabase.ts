@@ -10,7 +10,11 @@ export const saveState = async (state: AppState) => {
   try {
     const { error } = await supabase
       .from('app_state')
-      .upsert({ id: 'main', state });
+      .upsert({ 
+        id: 'main', 
+        state,
+        updated_at: new Date().toISOString()
+      });
     
     if (error) throw error;
   } catch (error) {
@@ -24,10 +28,10 @@ export const loadState = async (): Promise<AppState | null> => {
       .from('app_state')
       .select('state')
       .eq('id', 'main')
-      .single();
+      .limit(1);
     
     if (error) throw error;
-    return data?.state || null;
+    return data && data.length > 0 ? data[0].state : null;
   } catch (error) {
     console.error('Error loading state:', error);
     return null;
