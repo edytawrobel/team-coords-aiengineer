@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { AppState } from '../types';
 
 const supabaseUrl = 'https://etfwlzsdlddbswulqpqk.supabase.co';
-const supabaseKey = 'your-supabase-anon-key'; // TODO: Replace with actual anon key
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0ZndsenNkbGRkYnN3dWxxcHFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjY3NjksImV4cCI6MjA2NDIwMjc2OX0.ObIZZWz_8r1vENovb_CJu-OaZjhb6c-jFhP2GCuaMYs';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
