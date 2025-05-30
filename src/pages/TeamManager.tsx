@@ -55,7 +55,7 @@ export const TeamManager: React.FC = () => {
   };
   
   const handleDeleteMember = (id: string) => {
-    if (confirm('Are you sure you want to remove this team member?')) {
+    if (confirm('Are you sure you want to remove this team member? This action will be saved to the database.')) {
       dispatch({ type: 'REMOVE_TEAM_MEMBER', payload: id });
     }
   };
@@ -192,7 +192,7 @@ export const TeamManager: React.FC = () => {
               <Users className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-medium text-gray-900">No team members</h3>
               <p className="mt-1 text-sm text-gray-500">
-                Get started by adding a new team member.
+                Get started by adding a new team member. Changes will be saved automatically.
               </p>
               {!isAdding && (
                 <div className="mt-6">
