@@ -12,8 +12,7 @@ export const saveState = async (state: AppState) => {
       .from('app_state')
       .upsert({ 
         id: 'main', 
-        state,
-        updated_at: new Date().toISOString()
+        state
       });
     
     if (error) throw error;
