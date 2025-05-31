@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Calendar, Users, Clock, BarChart, Download } from 'lucide-react';
+import { Calendar, Users, Clock, BarChart, Download, BookOpen } from 'lucide-react';
 import { Session } from '../types';
 import { DailyBriefing } from '../components/DailyBriefing';
 import { OverlapAnalysis } from '../components/OverlapAnalysis';
 import { CalendarView } from '../components/CalendarView';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { exportToExcel } from '../utils/export';
 
 interface DashboardTab {
@@ -16,7 +16,6 @@ interface DashboardTab {
 
 export const Dashboard: React.FC = () => {
   const { state } = useAppContext();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('calendar');
   
   const currentDate = new Date().toLocaleDateString('en-US', { 
@@ -61,6 +60,13 @@ export const Dashboard: React.FC = () => {
             >
               <Calendar size={16} className="mr-2" />
               Schedule
+            </Link>
+            <Link
+              to="/notes"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            >
+              <BookOpen size={16} className="mr-2" />
+              Notes Exchange
             </Link>
             <Link
               to="/team"
