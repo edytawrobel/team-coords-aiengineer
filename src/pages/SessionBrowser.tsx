@@ -3,9 +3,8 @@ import { useAppContext } from '../context/AppContext';
 import { Session, Attendance } from '../types';
 import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
-import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Calendar, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
@@ -17,7 +16,6 @@ export const SessionBrowser: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  const [filteredSessions, setFilteredSessions] = useState<Session[]>(sessions);
   const [activeDay, setActiveDay] = useState<number>(1);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [isAddingSummary, setIsAddingSummary] = useState(false);
@@ -203,13 +201,6 @@ export const SessionBrowser: React.FC = () => {
               </div>
             </div>
             
-            <div className="px-4 sm:px-6 lg:px-8 pb-4">
-              <SearchFilter 
-                sessions={sessions} 
-                onFilterChange={setFilteredSessions} 
-              />
-            </div>
-            
             {viewMode === 'list' && (
               <div className="border-t border-b border-gray-200">
                 <div className="sm:hidden">
@@ -253,13 +244,13 @@ export const SessionBrowser: React.FC = () => {
             {viewMode === 'list' ? (
               <DaySchedule
                 day={activeDay}
-                sessions={filteredSessions}
+                sessions={sessions}
                 onSessionClick={handleSessionClick}
                 onToggleAttendance={handleToggleAttendance}
               />
             ) : (
               <CalendarView
-                sessions={filteredSessions}
+                sessions={sessions}
                 onSessionClick={handleSessionClick}
               />
             )}
