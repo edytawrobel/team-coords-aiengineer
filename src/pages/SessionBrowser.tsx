@@ -154,8 +154,6 @@ export const SessionBrowser: React.FC = () => {
   const currentMemberSummary = selectedSession && currentMemberId
     ? summaries.find(s => s.sessionId === selectedSession.id && s.authorId === currentMemberId)
     : null;
-
-  const canModifySession = selectedSession?.isCustom && selectedSession?.createdBy === currentMemberId;
   
   return (
     <div className="container mx-auto">
@@ -310,7 +308,7 @@ export const SessionBrowser: React.FC = () => {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                       {selectedSession.track}
                     </span>
-                    {canModifySession && (
+                    {currentMemberId && (
                       <>
                         {isEditing ? (
                           <div className="flex space-x-2">
@@ -341,13 +339,15 @@ export const SessionBrowser: React.FC = () => {
                             >
                               <Edit2 size={16} />
                             </button>
-                            <button
-                              onClick={() => handleDeleteSession(selectedSession.id)}
-                              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
-                              title="Delete session"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            {selectedSession.isCustom && selectedSession.createdBy === currentMemberId && (
+                              <button
+                                onClick={() => handleDeleteSession(selectedSession.id)}
+                                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
+                                title="Delete session"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
                           </>
                         )}
                       </>
