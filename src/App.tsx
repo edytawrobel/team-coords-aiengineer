@@ -16,7 +16,7 @@ function App() {
             <Route path="/team" element={<TeamManager />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/\" replace />} />
           </Routes>
         </div>
       </Router>
