@@ -5,7 +5,7 @@ import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
 import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X, Save } from 'lucide-react';
+import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
@@ -317,17 +317,16 @@ export const SessionBrowser: React.FC = () => {
                                 setIsEditing(false);
                                 setEditedSession({});
                               }}
-                              className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
-                              title="Cancel"
+                              className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                             >
-                              <X size={16} />
+                              <X size={16} className="mr-1" />
+                              Cancel
                             </button>
                             <button
                               onClick={handleSaveEdit}
-                              className="p-1 text-indigo-600 hover:text-indigo-800 rounded-full hover:bg-indigo-50"
-                              title="Save changes"
+                              className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
                             >
-                              <Save size={16} />
+                              Save
                             </button>
                           </div>
                         ) : (
