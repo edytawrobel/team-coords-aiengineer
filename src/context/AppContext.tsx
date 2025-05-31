@@ -140,7 +140,12 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       break;
       
     case 'LOAD_STATE':
-      newState = action.payload;
+      newState = {
+        team: action.payload.team || [],
+        sessions: action.payload.sessions || [],
+        attendance: action.payload.attendance || [],
+        notes: action.payload.notes || [], // Ensure notes is always an array
+      };
       break;
       
     default:
