@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Session, TeamMember } from '../types';
 import { getSessionsForMember, getMembersAttendingSession } from '../utils/helpers';
-import { AlarmClock, Calendar, Users, Plus, X } from 'lucide-react';
+import { AlarmClock, Calendar, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface DailyBriefingProps {
@@ -59,13 +59,6 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
           <Calendar className="mr-2 text-indigo-500" size={24} />
           Daily Briefing: {dayDate}
         </h2>
-        <Link
-          to={`/schedule?day=${day}`}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-        >
-          <Plus size={16} className="mr-2" />
-          Add Sessions
-        </Link>
       </div>
       
       {teamAttendance.length === 0 ? (
@@ -81,7 +74,7 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
           {popularSessions.length > 0 && (
             <div className="mb-6">
               <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                <Users className="mr-2 text-indigo-500\" size={18} />
+                <Users className="mr-2 text-indigo-500" size={18} />
                 Team Hotspots
               </h3>
               <div className="space-y-3">
