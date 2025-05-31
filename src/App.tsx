@@ -18,7 +18,7 @@ function App() {
             <Route path="/sessions" element={<SessionDetails />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/\" replace />} />
           </Routes>
         </div>
       </Router>
