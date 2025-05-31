@@ -53,7 +53,7 @@ export const AddSession = () => {
       payload: { sessionId: newSession.id, memberId: selectedMember },
     });
 
-    navigate('/sessions');
+    navigate('/');
   };
 
   return (
@@ -65,11 +65,11 @@ export const AddSession = () => {
         </div>
         
         <Link
-          to="/sessions"
+          to="/"
           className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
         >
           <ArrowLeft size={16} className="mr-2" />
-          Back to Sessions
+          Back to Dashboard
         </Link>
       </div>
 
@@ -114,7 +114,7 @@ export const AddSession = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
             <div>
               <label htmlFor="day" className="block text-sm font-medium text-gray-700">
                 Day *
@@ -233,7 +233,7 @@ export const AddSession = () => {
 
         <div className="mt-6 flex justify-end space-x-3">
           <Link
-            to="/sessions"
+            to="/"
             className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             Cancel
