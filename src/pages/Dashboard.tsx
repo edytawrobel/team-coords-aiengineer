@@ -54,7 +54,7 @@ export const Dashboard: React.FC = () => {
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Team Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Mission Control</h1>
             <p className="text-gray-600">{currentDate}</p>
           </div>
           
