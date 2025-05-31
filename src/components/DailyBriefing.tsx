@@ -74,7 +74,7 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
           {popularSessions.length > 0 && (
             <div className="mb-6">
               <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                <Users className="mr-2 text-indigo-500" size={18} />
+                <Users className="mr-2 text-indigo-500\" size={18} />
                 Team Hotspots
               </h3>
               <div className="space-y-3">
