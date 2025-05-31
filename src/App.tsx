@@ -3,9 +3,10 @@ import { AppProvider } from './context/AppContext';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { TeamManager } from './pages/TeamManager';
+import { SessionDetails } from './pages/SessionDetails';
 import { Schedule } from './pages/Schedule';
 import { AddSession } from './pages/AddSession';
-import { SessionDetails } from './pages/SessionDetails';
+import { NotesExchange } from './pages/NotesExchange';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
             <Route path="/sessions" element={<SessionDetails />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
-            <Route path="*" element={<Navigate to="/\" replace />} />
+            <Route path="/notes" element={<NotesExchange />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>

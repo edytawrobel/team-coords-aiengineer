@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
-import { AppState, Attendance, TeamMember, Session } from '../types';
+import { AppState, Attendance, TeamMember, Session, Note } from '../types';
 import { fetchSessions } from '../utils/api';
 import { saveState, loadState } from '../utils/supabase';
 
@@ -14,12 +14,16 @@ type AppAction =
   | { type: 'ADD_SESSION'; payload: Session }
   | { type: 'UPDATE_SESSION'; payload: Session }
   | { type: 'DELETE_SESSION'; payload: string }
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: Note }
+  | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'LOAD_STATE'; payload: AppState };
 
 const initialState: AppState = {
   team: [],
   sessions: [],
   attendance: [],
+  notes: [],
 };
 
 const appReducer = (state: AppState, action: AppAction): AppState => {
@@ -50,6 +54,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         team: state.team.filter((member) => member.id !== action.payload),
         attendance: state.attendance.filter((a) => a.memberId !== action.payload),
+        notes: state.notes.filter((n) => n.memberId !== action.payload),
       };
       break;
       
@@ -107,6 +112,30 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         sessions: state.sessions.filter((session) => session.id !== action.payload),
         attendance: state.attendance.filter((a) => a.sessionId !== action.payload),
+        notes: state.notes.filter((n) => n.sessionId !== action.payload),
+      };
+      break;
+
+    case 'ADD_NOTE':
+      newState = {
+        ...state,
+        notes: [...state.notes, action.payload],
+      };
+      break;
+
+    case 'UPDATE_NOTE':
+      newState = {
+        ...state,
+        notes: state.notes.map((note) =>
+          note.id === action.payload.id ? action.payload : note
+        ),
+      };
+      break;
+
+    case 'DELETE_NOTE':
+      newState = {
+        ...state,
+        notes: state.notes.filter((note) => note.id !== action.payload),
       };
       break;
       
