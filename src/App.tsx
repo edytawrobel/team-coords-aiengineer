@@ -5,6 +5,7 @@ import { Dashboard } from './pages/Dashboard';
 import { TeamManager } from './pages/TeamManager';
 import { Schedule } from './pages/Schedule';
 import { AddSession } from './pages/AddSession';
+import { SessionDetails } from './pages/SessionDetails';
 
 function App() {
   return (
@@ -14,9 +15,10 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/team" element={<TeamManager />} />
+            <Route path="/sessions" element={<SessionDetails />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
-            <Route path="*" element={<Navigate to="/\" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>
