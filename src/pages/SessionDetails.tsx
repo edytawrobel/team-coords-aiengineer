@@ -44,6 +44,16 @@ export const SessionDetails: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">
+      <div className="flex justify-between items-center mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <ArrowLeft size={16} className="mr-2" />
+          Back to Dashboard
+        </Link>
+      </div>
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-start mb-6">
           <div>
