@@ -3,7 +3,6 @@ import { AppProvider } from './context/AppContext';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Dashboard } from './pages/Dashboard';
 import { TeamManager } from './pages/TeamManager';
-import { SessionBrowser } from './pages/SessionBrowser';
 import { Schedule } from './pages/Schedule';
 import { AddSession } from './pages/AddSession';
 
@@ -15,10 +14,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/team" element={<TeamManager />} />
-            <Route path="/sessions" element={<SessionBrowser />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
-            <Route path="*" element={<Navigate to="/\" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </Router>
