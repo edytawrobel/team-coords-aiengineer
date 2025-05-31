@@ -60,8 +60,8 @@ export const AddSession = () => {
     <div className="container mx-auto px-4 py-6 max-w-3xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Add Manual Session</h1>
-          <p className="text-gray-600">Add a custom session to your schedule</p>
+          <h1 className="text-2xl font-bold text-gray-900">Add Session</h1>
+          <p className="text-gray-600">Add a custom or missing session to the schedule.</p>
         </div>
         
         <Link
