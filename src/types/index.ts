@@ -30,14 +30,6 @@ export interface Speaker {
   image: string;
 }
 
-export interface Summary {
-  id: string;
-  sessionId: string;
-  content: string;
-  createdAt: string;
-  createdBy: string;
-}
-
 export interface Attendance {
   sessionId: string;
   memberId: string;
@@ -49,5 +41,4 @@ export interface AppState {
   team: TeamMember[];
   sessions: Session[];
   attendance: Attendance[];
-  summaries: Summary[];
 }

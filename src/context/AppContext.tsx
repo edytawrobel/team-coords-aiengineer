@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
-import { AppState, Attendance, TeamMember, Session, Summary } from '../types';
+import { AppState, Attendance, TeamMember, Session } from '../types';
 import { fetchSessions } from '../utils/api';
 import { saveState, loadState } from '../utils/supabase';
 
@@ -14,16 +14,12 @@ type AppAction =
   | { type: 'ADD_SESSION'; payload: Session }
   | { type: 'UPDATE_SESSION'; payload: Session }
   | { type: 'DELETE_SESSION'; payload: string }
-  | { type: 'ADD_SUMMARY'; payload: Summary }
-  | { type: 'REMOVE_SUMMARY'; payload: string }
-  | { type: 'SET_SUMMARIES'; payload: Summary[] }
   | { type: 'LOAD_STATE'; payload: AppState };
 
 const initialState: AppState = {
   team: [],
   sessions: [],
   attendance: [],
-  summaries: [],
 };
 
 const appReducer = (state: AppState, action: AppAction): AppState => {
@@ -111,28 +107,6 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         ...state,
         sessions: state.sessions.filter((session) => session.id !== action.payload),
         attendance: state.attendance.filter((a) => a.sessionId !== action.payload),
-        summaries: state.summaries.filter((s) => s.sessionId !== action.payload),
-      };
-      break;
-      
-    case 'ADD_SUMMARY':
-      newState = {
-        ...state,
-        summaries: [...state.summaries, action.payload],
-      };
-      break;
-      
-    case 'REMOVE_SUMMARY':
-      newState = {
-        ...state,
-        summaries: state.summaries.filter((summary) => summary.id !== action.payload),
-      };
-      break;
-      
-    case 'SET_SUMMARIES':
-      newState = {
-        ...state,
-        summaries: action.payload,
       };
       break;
       

@@ -6,19 +6,16 @@ import { CalendarView } from '../components/CalendarView';
 import { TeamSelector } from '../components/TeamSelector';
 import { Calendar, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { SummaryForm } from '../components/SummaryForm';
-import { SummaryCard } from '../components/SummaryCard';
-import { getMembersAttendingSession, getSummariesForSession } from '../utils/helpers';
+import { getMembersAttendingSession } from '../utils/helpers';
 
 export const SessionBrowser: React.FC = () => {
   const { state, dispatch } = useAppContext();
-  const { sessions, team, attendance, summaries } = state;
+  const { sessions, team, attendance } = state;
   const location = useLocation();
   const navigate = useNavigate();
   
   const [activeDay, setActiveDay] = useState<number>(1);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [isAddingSummary, setIsAddingSummary] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [isEditing, setIsEditing] = useState(false);
   const [editedSession, setEditedSession] = useState<Partial<Session>>({});
@@ -84,11 +81,6 @@ export const SessionBrowser: React.FC = () => {
     searchParams.set('view', mode);
     navigate(`/sessions?${searchParams.toString()}`, { replace: true });
   };
-  
-  const handleSaveSummary = (summary: any) => {
-    dispatch({ type: 'ADD_SUMMARY', payload: summary });
-    setIsAddingSummary(false);
-  };
 
   const handleDeleteSession = (sessionId: string) => {
     if (window.confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
@@ -138,10 +130,6 @@ export const SessionBrowser: React.FC = () => {
   
   const sessionAttendees = selectedSession
     ? getMembersAttendingSession(selectedSession.id, attendance, team)
-    : [];
-  
-  const sessionSummaries = selectedSession
-    ? getSummariesForSession(selectedSession.id, summaries)
     : [];
   
   return (
@@ -428,56 +416,6 @@ export const SessionBrowser: React.FC = () => {
                         </p>
                       )}
                     </>
-                  )}
-                </div>
-                
-                <div className="mt-8 border-t border-gray-200 pt-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">Knowledge Sharing</h3>
-                    
-                    {!isAddingSummary && (
-                      <button
-                        onClick={() => setIsAddingSummary(true)}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Add Summary
-                      </button>
-                    )}
-                  </div>
-                  
-                  {isAddingSummary && (
-                    <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                      <SummaryForm
-                        session={selectedSession}
-                        author={team[0]}
-                        onSave={handleSaveSummary}
-                        onCancel={() => setIsAddingSummary(false)}
-                      />
-                    </div>
-                  )}
-                  
-                  {sessionSummaries.length > 0 ? (
-                    <div className="space-y-4">
-                      {sessionSummaries.map(summary => {
-                        const author = team.find(m => m.id === summary.authorId);
-                        if (!author) return null;
-                        
-                        return (
-                          <SummaryCard
-                            key={summary.id}
-                            summary={summary}
-                            session={selectedSession}
-                            author={author}
-                            onEdit={() => setIsAddingSummary(true)}
-                            onDelete={() => dispatch({ type: 'REMOVE_SUMMARY', payload: summary.id })}
-                          />
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">
-                      No summaries shared for this session yet
-                    </p>
                   )}
                 </div>
               </div>
