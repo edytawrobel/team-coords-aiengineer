@@ -5,7 +5,7 @@ import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
 import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Calendar, Filter, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
@@ -20,7 +20,6 @@ export const SessionBrowser: React.FC = () => {
   const [filteredSessions, setFilteredSessions] = useState<Session[]>(sessions);
   const [activeDay, setActiveDay] = useState<number>(1);
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [isAddingSummary, setIsAddingSummary] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [isEditing, setIsEditing] = useState(false);
@@ -147,14 +146,6 @@ export const SessionBrowser: React.FC = () => {
     ? getSummariesForSession(selectedSession.id, summaries)
     : [];
   
-  const currentMember = currentMemberId
-    ? team.find(member => member.id === currentMemberId)
-    : null;
-  
-  const currentMemberSummary = selectedSession && currentMemberId
-    ? summaries.find(s => s.sessionId === selectedSession.id && s.authorId === currentMemberId)
-    : null;
-  
   return (
     <div className="container mx-auto">
       <div className="flex flex-col lg:flex-row">
@@ -209,16 +200,6 @@ export const SessionBrowser: React.FC = () => {
                   <Calendar size={16} className="mr-2" />
                   Dashboard
                 </Link>
-                
-                <div className="relative">
-                  <button
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                    onClick={() => setCurrentMemberId(currentMemberId ? null : team[0]?.id || null)}
-                  >
-                    <User size={16} className="mr-2" />
-                    {currentMember ? currentMember.name : 'View as'}
-                  </button>
-                </div>
               </div>
             </div>
             
@@ -273,7 +254,6 @@ export const SessionBrowser: React.FC = () => {
               <DaySchedule
                 day={activeDay}
                 sessions={filteredSessions}
-                currentMemberId={currentMemberId}
                 onSessionClick={handleSessionClick}
                 onToggleAttendance={handleToggleAttendance}
               />
@@ -308,49 +288,47 @@ export const SessionBrowser: React.FC = () => {
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                       {selectedSession.track}
                     </span>
-                    {currentMemberId && (
-                      <>
-                        {isEditing ? (
-                          <div className="flex space-x-2">
+                    <>
+                      {isEditing ? (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              setIsEditing(false);
+                              setEditedSession({});
+                            }}
+                            className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                          >
+                            <X size={16} className="mr-1" />
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveEdit}
+                            className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={handleEditSession}
+                            className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100"
+                            title="Edit session"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          {selectedSession.isCustom && (
                             <button
-                              onClick={() => {
-                                setIsEditing(false);
-                                setEditedSession({});
-                              }}
-                              className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                              onClick={() => handleDeleteSession(selectedSession.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
+                              title="Delete session"
                             >
-                              <X size={16} className="mr-1" />
-                              Cancel
+                              <Trash2 size={16} />
                             </button>
-                            <button
-                              onClick={handleSaveEdit}
-                              className="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
-                            >
-                              Save
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <button
-                              onClick={handleEditSession}
-                              className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100"
-                              title="Edit session"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            {selectedSession.isCustom && selectedSession.createdBy === currentMemberId && (
-                              <button
-                                onClick={() => handleDeleteSession(selectedSession.id)}
-                                className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
-                                title="Delete session"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
+                          )}
+                        </>
+                      )}
+                    </>
                   </div>
                 </div>
                 
@@ -434,7 +412,7 @@ export const SessionBrowser: React.FC = () => {
                         to="/team" 
                         className="inline-flex items-center mt-2 text-indigo-600 hover:text-indigo-800"
                       >
-                        <UserPlus size={16} className="mr-1" />
+                        <Plus size={16} className="mr-1" />
                         Add Team Members
                       </Link>
                     </div>
@@ -466,7 +444,7 @@ export const SessionBrowser: React.FC = () => {
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-medium text-gray-900">Knowledge Sharing</h3>
                     
-                    {currentMember && !isAddingSummary && !currentMemberSummary && (
+                    {!isAddingSummary && (
                       <button
                         onClick={() => setIsAddingSummary(true)}
                         className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
@@ -476,11 +454,11 @@ export const SessionBrowser: React.FC = () => {
                     )}
                   </div>
                   
-                  {isAddingSummary && currentMember && (
+                  {isAddingSummary && (
                     <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                       <SummaryForm
                         session={selectedSession}
-                        author={currentMember}
+                        author={team[0]}
                         onSave={handleSaveSummary}
                         onCancel={() => setIsAddingSummary(false)}
                       />
@@ -499,12 +477,8 @@ export const SessionBrowser: React.FC = () => {
                             summary={summary}
                             session={selectedSession}
                             author={author}
-                            onEdit={currentMemberId === author.id ? () => setIsAddingSummary(true) : undefined}
-                            onDelete={
-                              currentMemberId === author.id 
-                                ? () => dispatch({ type: 'REMOVE_SUMMARY', payload: summary.id }) 
-                                : undefined
-                            }
+                            onEdit={() => setIsAddingSummary(true)}
+                            onDelete={() => dispatch({ type: 'REMOVE_SUMMARY', payload: summary.id })}
                           />
                         );
                       })}
