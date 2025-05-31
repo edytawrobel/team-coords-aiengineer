@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowLeft, Plus } from 'lucide-react';
+import { Calendar, ArrowLeft, Plus, Download } from 'lucide-react';
 import { TeamSelector } from '../components/TeamSelector';
 import { getMembersAttendingSession } from '../utils/helpers';
+import { exportToExcel, exportToPDF } from '../utils/export';
 
 export const Schedule: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedMember, setSelectedMember] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const daySessions = state.sessions.filter(session => session.day === selectedDay);
 
@@ -30,6 +32,15 @@ export const Schedule: React.FC = () => {
       .toUpperCase();
   };
 
+  const handleExport = (format: 'excel' | 'pdf') => {
+    if (format === 'excel') {
+      exportToExcel(state.sessions, state.team, state.attendance);
+    } else {
+      exportToPDF(state.sessions, state.team, state.attendance);
+    }
+    setShowExportMenu(false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
@@ -42,6 +53,37 @@ export const Schedule: React.FC = () => {
         </div>
         
         <div className="flex space-x-3">
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <Download size={16} className="mr-2" />
+              Export
+            </button>
+            
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                <div className="py-1" role="menu">
+                  <button
+                    onClick={() => handleExport('excel')}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Export to Excel
+                  </button>
+                  <button
+                    onClick={() => handleExport('pdf')}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    role="menuitem"
+                  >
+                    Export to PDF
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <Link
             to="/add-session"
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
