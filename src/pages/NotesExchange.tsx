@@ -17,8 +17,9 @@ export const NotesExchange: React.FC = () => {
       const session = state.sessions.find(s => s.id === note.sessionId);
       const member = state.team.find(m => m.id === note.memberId);
       const term = searchTerm.toLowerCase();
+      
+      // Only search by session title and team member name
       return (
-        note.content.toLowerCase().includes(term) ||
         session?.title.toLowerCase().includes(term) ||
         member?.name.toLowerCase().includes(term)
       );
@@ -81,7 +82,7 @@ export const NotesExchange: React.FC = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search notes, sessions, or team members..."
+            placeholder="Search by session title or team member name..."
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
