@@ -5,7 +5,7 @@ import { DaySchedule } from '../components/DaySchedule';
 import { CalendarView } from '../components/CalendarView';
 import { SearchFilter } from '../components/SearchFilter';
 import { TeamSelector } from '../components/TeamSelector';
-import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Filter, User, UserPlus, GridIcon, ListIcon as ListIcon, Plus, Trash2, Edit2, X, Save } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SummaryForm } from '../components/SummaryForm';
 import { SummaryCard } from '../components/SummaryCard';
@@ -23,6 +23,8 @@ export const SessionBrowser: React.FC = () => {
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [isAddingSummary, setIsAddingSummary] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedSession, setEditedSession] = useState<Partial<Session>>({});
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -45,6 +47,8 @@ export const SessionBrowser: React.FC = () => {
   
   const handleSessionClick = (session: Session) => {
     setSelectedSessionId(session.id === selectedSessionId ? null : session.id);
+    setIsEditing(false);
+    setEditedSession({});
     
     const searchParams = new URLSearchParams();
     searchParams.set('day', session.day.toString());
@@ -96,6 +100,40 @@ export const SessionBrowser: React.FC = () => {
       navigate(`/sessions?day=${activeDay}&view=${viewMode}`, { replace: true });
     }
   };
+
+  const handleEditSession = () => {
+    if (!selectedSession) return;
+    setIsEditing(true);
+    setEditedSession({
+      title: selectedSession.title,
+      day: selectedSession.day,
+      startTime: selectedSession.startTime,
+      endTime: selectedSession.endTime,
+      room: selectedSession.room,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedSession || !editedSession.title) return;
+
+    const updatedSession: Session = {
+      ...selectedSession,
+      ...editedSession,
+      date: `June ${editedSession.day! + 2}, 2025`,
+    };
+
+    dispatch({ type: 'UPDATE_SESSION', payload: updatedSession });
+    setIsEditing(false);
+    setEditedSession({});
+
+    if (editedSession.day !== selectedSession.day) {
+      const searchParams = new URLSearchParams();
+      searchParams.set('day', editedSession.day!.toString());
+      searchParams.set('id', selectedSession.id);
+      searchParams.set('view', viewMode);
+      navigate(`/sessions?${searchParams.toString()}`, { replace: true });
+    }
+  };
   
   const selectedSession = selectedSessionId
     ? sessions.find(session => session.id === selectedSessionId)
@@ -117,7 +155,7 @@ export const SessionBrowser: React.FC = () => {
     ? summaries.find(s => s.sessionId === selectedSession.id && s.authorId === currentMemberId)
     : null;
 
-  const canDeleteSession = selectedSession?.isCustom && selectedSession?.createdBy === currentMemberId;
+  const canModifySession = selectedSession?.isCustom && selectedSession?.createdBy === currentMemberId;
   
   return (
     <div className="container mx-auto">
@@ -255,26 +293,119 @@ export const SessionBrowser: React.FC = () => {
             <div className="h-full overflow-y-auto" style={{ maxHeight: 'calc(100vh - 75px)' }}>
               <div className="px-4 py-5 sm:p-6">
                 <div className="flex justify-between items-start">
-                  <h2 className="text-xl font-bold text-gray-900 pr-4">{selectedSession.title}</h2>
+                  {isEditing ? (
+                    <div className="flex-1 pr-4">
+                      <input
+                        type="text"
+                        value={editedSession.title}
+                        onChange={(e) => setEditedSession({ ...editedSession, title: e.target.value })}
+                        className="w-full text-xl font-bold text-gray-900 border-b border-gray-300 focus:border-indigo-500 focus:ring-0 px-0"
+                        placeholder="Session title"
+                      />
+                    </div>
+                  ) : (
+                    <h2 className="text-xl font-bold text-gray-900 pr-4">{selectedSession.title}</h2>
+                  )}
                   <div className="flex items-center space-x-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                       {selectedSession.track}
                     </span>
-                    {canDeleteSession && (
-                      <button
-                        onClick={() => handleDeleteSession(selectedSession.id)}
-                        className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
-                        title="Delete session"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    {canModifySession && (
+                      <>
+                        {isEditing ? (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => {
+                                setIsEditing(false);
+                                setEditedSession({});
+                              }}
+                              className="p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                              title="Cancel"
+                            >
+                              <X size={16} />
+                            </button>
+                            <button
+                              onClick={handleSaveEdit}
+                              className="p-1 text-indigo-600 hover:text-indigo-800 rounded-full hover:bg-indigo-50"
+                              title="Save changes"
+                            >
+                              <Save size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={handleEditSession}
+                              className="p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100"
+                              title="Edit session"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSession(selectedSession.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-gray-100"
+                              title="Delete session"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
                 
-                <p className="mt-1 text-sm text-gray-500">
-                  Day {selectedSession.day} • {selectedSession.startTime}-{selectedSession.endTime} • {selectedSession.room}
-                </p>
+                {isEditing ? (
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+                        <select
+                          value={editedSession.day}
+                          onChange={(e) => setEditedSession({ ...editedSession, day: parseInt(e.target.value) })}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        >
+                          <option value={1}>Day 1 (June 3)</option>
+                          <option value={2}>Day 2 (June 4)</option>
+                          <option value={3}>Day 3 (June 5)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Room</label>
+                        <input
+                          type="text"
+                          value={editedSession.room}
+                          onChange={(e) => setEditedSession({ ...editedSession, room: e.target.value })}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                        <input
+                          type="time"
+                          value={editedSession.startTime}
+                          onChange={(e) => setEditedSession({ ...editedSession, startTime: e.target.value })}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                        <input
+                          type="time"
+                          value={editedSession.endTime}
+                          onChange={(e) => setEditedSession({ ...editedSession, endTime: e.target.value })}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-sm text-gray-500">
+                    Day {selectedSession.day} • {selectedSession.startTime}-{selectedSession.endTime} • {selectedSession.room}
+                  </p>
+                )}
                 
                 <div className="mt-4">
                   <p className="text-gray-700">{selectedSession.description}</p>
