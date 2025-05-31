@@ -4,14 +4,15 @@ import { formatTime } from '../utils/helpers';
 import { Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getMembersAttendingSession } from '../utils/helpers';
+import { useNavigate } from 'react-router-dom';
 
 interface CalendarViewProps {
   sessions: Session[];
-  onSessionClick?: (session: Session) => void;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ sessions, onSessionClick }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({ sessions }) => {
   const { state } = useAppContext();
+  const navigate = useNavigate();
   
   const getInitials = (name: string) => {
     return name
@@ -19,6 +20,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ sessions, onSessionC
       .map(part => part[0])
       .join('')
       .toUpperCase();
+  };
+
+  const handleSessionClick = (session: Session) => {
+    navigate(`/sessions?id=${session.id}`);
   };
   
   // Group sessions by day and time slot
@@ -117,7 +122,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ sessions, onSessionC
                         return (
                           <div
                             key={session.id}
-                            onClick={() => onSessionClick?.(session)}
+                            onClick={() => handleSessionClick(session)}
                             className={`
                               p-4 rounded-lg border-l-4 bg-white shadow-sm
                               hover:shadow-md transition-all cursor-pointer

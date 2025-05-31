@@ -1,19 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { Session, TeamMember } from '../types';
 import { getSessionsForMember, getMembersAttendingSession } from '../utils/helpers';
 import { AlarmClock, Calendar, Users } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface DailyBriefingProps {
   day: number;
-  onViewSession?: (session: Session) => void;
 }
 
-export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession }) => {
+export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day }) => {
   const { state } = useAppContext();
   const { sessions, team, attendance } = state;
-  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
   
   const dayDate = useMemo(() => {
     const dates = ['June 3, 2025', 'June 4, 2025', 'June 5, 2025'];
@@ -51,6 +50,10 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
       };
     }).filter(item => item.sessions.length > 0);
   }, [team, attendance, daySessions]);
+
+  const handleSessionClick = (session: Session) => {
+    navigate(`/sessions?id=${session.id}`);
+  };
   
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -74,7 +77,7 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
           {popularSessions.length > 0 && (
             <div className="mb-6">
               <h3 className="text-md font-semibold text-gray-700 mb-3 flex items-center">
-                <Users className="mr-2 text-indigo-500\" size={18} />
+                <Users className="mr-2 text-indigo-500" size={18} />
                 Team Hotspots
               </h3>
               <div className="space-y-3">
@@ -82,7 +85,7 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
                   <div 
                     key={session.id}
                     className="p-3 bg-indigo-50 rounded-md cursor-pointer hover:bg-indigo-100 transition-colors"
-                    onClick={() => onViewSession?.(session)}
+                    onClick={() => handleSessionClick(session)}
                   >
                     <div className="flex justify-between">
                       <span className="text-sm font-medium text-indigo-800">
@@ -133,7 +136,7 @@ export const DailyBriefing: React.FC<DailyBriefingProps> = ({ day, onViewSession
                       <div 
                         key={session.id} 
                         className="cursor-pointer hover:text-indigo-600"
-                        onClick={() => onViewSession?.(session)}
+                        onClick={() => handleSessionClick(session)}
                       >
                         <span className="font-medium">{session.startTime} - {session.endTime}</span>:{' '}
                         {session.title} ({session.room})
