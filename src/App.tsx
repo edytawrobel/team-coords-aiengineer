@@ -20,7 +20,7 @@ function App() {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/add-session" element={<AddSession />} />
             <Route path="/notes" element={<NotesExchange />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/\" replace />} />
           </Routes>
         </div>
       </Router>
