@@ -33,17 +33,6 @@ export const Dashboard: React.FC = () => {
     { id: 'day3', name: 'Day 3', icon: <Clock size={20} /> },
     { id: 'analysis', name: 'Analysis', icon: <BarChart size={20} /> },
   ];
-  
-  const handleViewSession = (session: Session) => {
-    navigate(`/sessions?day=${session.day}&id=${session.id}`);
-  };
-  
-  const handleViewSessionById = (sessionId: string) => {
-    const session = state.sessions.find(s => s.id === sessionId);
-    if (session) {
-      navigate(`/sessions?day=${session.day}&id=${session.id}`);
-    }
-  };
 
   const handleExport = () => {
     exportToExcel(state.sessions, state.team, state.attendance);
@@ -146,19 +135,19 @@ export const Dashboard: React.FC = () => {
           
           <div>
             {activeTab === 'calendar' && (
-              <CalendarView sessions={state.sessions} onSessionClick={handleViewSession} />
+              <CalendarView sessions={state.sessions} />
             )}
             {activeTab === 'day1' && (
-              <DailyBriefing day={1} onViewSession={handleViewSession} />
+              <DailyBriefing day={1} />
             )}
             {activeTab === 'day2' && (
-              <DailyBriefing day={2} onViewSession={handleViewSession} />
+              <DailyBriefing day={2} />
             )}
             {activeTab === 'day3' && (
-              <DailyBriefing day={3} onViewSession={handleViewSession} />
+              <DailyBriefing day={3} />
             )}
             {activeTab === 'analysis' && (
-              <OverlapAnalysis onViewSession={handleViewSessionById} />
+              <OverlapAnalysis />
             )}
           </div>
         </>
