@@ -9,70 +9,127 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          name: string
+          role: string | null
+          avatar: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          role?: string | null
+          avatar?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          role?: string | null
+          avatar?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       sessions: {
         Row: {
           id: string
           title: string
           description: string | null
-          track: string | null
-          room: string | null
-          day: number | null
-          start_time: string | null
-          end_time: string | null
-          date: string | null
-          is_custom: boolean | null
-          created_by: string | null
-          speaker_name: string
-          speaker_bio: string | null
-          speaker_company: string | null
-          speaker_title: string | null
-          speaker_image: string | null
-          created_at: string | null
-          updated_at: string | null
+          session_format: string | null
+          assigned_track: string | null
+          room: string
+          scheduled_at: string
+          starts_at: string
+          ends_at: string
+          speakers: string[] | null
+          companies: string[] | null
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id: string
+          id?: string
           title: string
           description?: string | null
-          track?: string | null
-          room?: string | null
-          day?: number | null
-          start_time?: string | null
-          end_time?: string | null
-          date?: string | null
-          is_custom?: boolean | null
-          created_by?: string | null
-          speaker_name: string
-          speaker_bio?: string | null
-          speaker_company?: string | null
-          speaker_title?: string | null
-          speaker_image?: string | null
-          created_at?: string | null
-          updated_at?: string | null
+          session_format?: string | null
+          assigned_track?: string | null
+          room: string
+          scheduled_at: string
+          starts_at: string
+          ends_at: string
+          speakers?: string[] | null
+          companies?: string[] | null
+          created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           title?: string
           description?: string | null
-          track?: string | null
-          room?: string | null
-          day?: number | null
-          start_time?: string | null
-          end_time?: string | null
-          date?: string | null
-          is_custom?: boolean | null
-          created_by?: string | null
-          speaker_name?: string
-          speaker_bio?: string | null
-          speaker_company?: string | null
-          speaker_title?: string | null
-          speaker_image?: string | null
-          created_at?: string | null
-          updated_at?: string | null
+          session_format?: string | null
+          assigned_track?: string | null
+          room?: string
+          scheduled_at?: string
+          starts_at?: string
+          ends_at?: string
+          speakers?: string[] | null
+          companies?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      attendees: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
+      notes: {
+        Row: {
+          id: string
+          session_id: string
+          contributor_id: string
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          contributor_id: string
+          content: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          contributor_id?: string
+          content?: string
+          created_at?: string
+          updated_at?: string
         }
       }
     }
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Functions: {}
+    Enums: {}
   }
 }
