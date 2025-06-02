@@ -13,7 +13,7 @@ export const fetchSessions = async (): Promise<Session[]> => {
     const conferenceSessions = jsonData.map((item: any) => ({
       id: item['Session ID'],
       title: item.Title,
-      description: item.Description,
+      description: item.Description || '',
       track: item['Assigned Track'] || 'General',
       room: item.Room,
       day: new Date(item.startsAt).getDate() - 2, // Convert to day 1, 2, or 3
@@ -35,11 +35,11 @@ export const fetchSessions = async (): Promise<Session[]> => {
       }),
       speaker: {
         id: item['Session ID'] + '_speaker',
-        name: item.Speakers,
+        name: item.Speakers.split(',')[0].trim(), // Take first speaker if multiple
         bio: '',
-        company: item.Companies,
-        title: '',
-        image: `https://api.dicebear.com/7.x/initials/jpg?seed=${encodeURIComponent(item.Speakers)}`
+        company: item.Companies.split(',')[0].trim(), // Take first company if multiple
+        title: item['Session Format'] || '',
+        image: `https://api.dicebear.com/7.x/initials/jpg?seed=${encodeURIComponent(item.Speakers.split(',')[0].trim())}`
       },
       isCustom: false
     }));
