@@ -6,11 +6,13 @@ import { generateId } from '../utils/helpers';
 import { teamColors, getNextAvailableColor } from '../utils/teamColors';
 import { UserPlus, Users, X, Edit, Save, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { saveTeamMember, deleteTeamMember } from '../utils/supabase';
 
 export const TeamManager: React.FC = () => {
   const { state, dispatch } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const [newMember, setNewMember] = useState<Partial<TeamMemberType>>({
     name: '',
@@ -18,45 +20,66 @@ export const TeamManager: React.FC = () => {
     avatar: '',
   });
   
-  const handleAddMember = () => {
-    if (!newMember.name) return;
-    
-    // Get the next available color
-    const usedColors = state.team.map(member => member.color);
-    const colorObj = getNextAvailableColor(usedColors);
-    
-    const member: TeamMemberType = {
-      id: generateId(),
-      name: newMember.name,
-      role: newMember.role || 'Team Member',
-      avatar: newMember.avatar || '',
-      color: colorObj.name,
-    };
-    
-    dispatch({ type: 'ADD_TEAM_MEMBER', payload: member });
-    setNewMember({ name: '', role: '', avatar: '' });
-    setIsAdding(false);
+  const handleAddMember = async () => {
+    try {
+      if (!newMember.name) return;
+      setError(null);
+      
+      // Get the next available color
+      const usedColors = state.team.map(member => member.color);
+      const colorObj = getNextAvailableColor(usedColors);
+      
+      const member: TeamMemberType = {
+        id: generateId(),
+        name: newMember.name,
+        role: newMember.role || 'Team Member',
+        avatar: newMember.avatar || '',
+        color: colorObj.name,
+      };
+      
+      await saveTeamMember(member);
+      dispatch({ type: 'ADD_TEAM_MEMBER', payload: member });
+      setNewMember({ name: '', role: '', avatar: '' });
+      setIsAdding(false);
+    } catch (err) {
+      setError('Failed to add team member. Please try again.');
+      console.error('Error adding team member:', err);
+    }
   };
   
-  const handleUpdateMember = (id: string) => {
-    const member = state.team.find(m => m.id === id);
-    if (!member || !newMember.name) return;
-    
-    const updatedMember: TeamMemberType = {
-      ...member,
-      name: newMember.name,
-      role: newMember.role || member.role,
-      avatar: newMember.avatar || member.avatar,
-    };
-    
-    dispatch({ type: 'UPDATE_TEAM_MEMBER', payload: updatedMember });
-    setNewMember({ name: '', role: '', avatar: '' });
-    setEditingId(null);
+  const handleUpdateMember = async (id: string) => {
+    try {
+      const member = state.team.find(m => m.id === id);
+      if (!member || !newMember.name) return;
+      setError(null);
+      
+      const updatedMember: TeamMemberType = {
+        ...member,
+        name: newMember.name,
+        role: newMember.role || member.role,
+        avatar: newMember.avatar || member.avatar,
+      };
+      
+      await saveTeamMember(updatedMember);
+      dispatch({ type: 'UPDATE_TEAM_MEMBER', payload: updatedMember });
+      setNewMember({ name: '', role: '', avatar: '' });
+      setEditingId(null);
+    } catch (err) {
+      setError('Failed to update team member. Please try again.');
+      console.error('Error updating team member:', err);
+    }
   };
   
-  const handleDeleteMember = (id: string) => {
-    if (confirm('Are you sure you want to remove this team member? This action will be saved to the database.')) {
-      dispatch({ type: 'REMOVE_TEAM_MEMBER', payload: id });
+  const handleDeleteMember = async (id: string) => {
+    try {
+      if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
+        setError(null);
+        await deleteTeamMember(id);
+        dispatch({ type: 'REMOVE_TEAM_MEMBER', payload: id });
+      }
+    } catch (err) {
+      setError('Failed to delete team member. Please try again.');
+      console.error('Error deleting team member:', err);
     }
   };
   
@@ -68,12 +91,14 @@ export const TeamManager: React.FC = () => {
     });
     setEditingId(member.id);
     setIsAdding(false);
+    setError(null);
   };
   
   const handleCancel = () => {
     setNewMember({ name: '', role: '', avatar: '' });
     setIsAdding(false);
     setEditingId(null);
+    setError(null);
   };
   
   return (
@@ -103,6 +128,12 @@ export const TeamManager: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {(isAdding || editingId) && (
@@ -192,7 +223,7 @@ export const TeamManager: React.FC = () => {
               <Users className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-medium text-gray-900">No team members</h3>
               <p className="mt-1 text-sm text-gray-500">
-                Get started by adding a new team member. Changes will be saved automatically.
+                Get started by adding a new team member.
               </p>
               {!isAdding && (
                 <div className="mt-6">
