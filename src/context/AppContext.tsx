@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useEffect, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { AppState, Attendance, TeamMember, Session, Note } from '../types';
 import { fetchSessions } from '../utils/api';
-import { saveState, loadState } from '../utils/supabase';
 
 type AppAction =
   | { type: 'SET_SESSIONS'; payload: AppState['sessions'] }
@@ -140,20 +139,13 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       break;
       
     case 'LOAD_STATE':
-      newState = {
-        team: action.payload.team || [],
-        sessions: action.payload.sessions || [],
-        attendance: action.payload.attendance || [],
-        notes: action.payload.notes || [], // Ensure notes is always an array
-      };
+      newState = action.payload;
       break;
       
     default:
       return state;
   }
   
-  // Save state to Supabase after each change
-  saveState(newState);
   return newState;
 };
 
@@ -170,13 +162,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const initializeState = async () => {
       try {
-        // Load state from Supabase
-        const savedState = await loadState();
-        if (savedState) {
-          dispatch({ type: 'LOAD_STATE', payload: savedState });
-        }
-        
-        // Fetch sessions
         const sessions = await fetchSessions();
         dispatch({ type: 'SET_SESSIONS', payload: sessions });
       } catch (error) {
