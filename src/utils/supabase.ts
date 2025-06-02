@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { AppState, TeamMember } from '../types';
+import type { AppState, TeamMember, Note, Attendance } from '../types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -12,27 +12,51 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const saveState = async (state: AppState) => {
   try {
-    const { error } = await supabase
+    // Save custom sessions to app_state
+    await supabase
       .from('app_state')
       .upsert({ 
         id: 'main', 
         state: {
-          sessions: state.sessions.filter(s => s.isCustom), // Only save custom sessions
-          attendance: state.attendance,
-          notes: state.notes
+          sessions: state.sessions.filter(s => s.isCustom)
         }
       });
-    
-    if (error) throw error;
+
+    // Save notes
+    const notesPromises = state.notes.map(note => 
+      supabase
+        .from('notes')
+        .upsert({
+          id: note.id,
+          session_id: note.sessionId,
+          member_id: note.memberId,
+          content: note.content,
+          created_at: note.createdAt,
+          updated_at: note.updatedAt
+        })
+    );
+
+    // Save attendance
+    const attendancePromises = state.attendance.map(record =>
+      supabase
+        .from('attendance')
+        .upsert({
+          session_id: record.sessionId,
+          member_id: record.memberId
+        })
+    );
+
+    await Promise.all([...notesPromises, ...attendancePromises]);
   } catch (error) {
     console.error('Error saving state:', error);
+    throw error;
   }
 };
 
 export const loadState = async (): Promise<AppState | null> => {
   try {
-    // Load both app state and team members in parallel
-    const [stateResult, teamResult] = await Promise.all([
+    // Load all data in parallel
+    const [stateResult, teamResult, notesResult, attendanceResult] = await Promise.all([
       supabase
         .from('app_state')
         .select('state')
@@ -41,14 +65,22 @@ export const loadState = async (): Promise<AppState | null> => {
       supabase
         .from('team_members')
         .select('*')
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('attendance')
+        .select('*')
     ]);
 
     if (stateResult.error && stateResult.error.code !== 'PGRST116') {
-      // PGRST116 means no rows returned - that's okay for first load
       throw stateResult.error;
     }
     if (teamResult.error) throw teamResult.error;
+    if (notesResult.error) throw notesResult.error;
+    if (attendanceResult.error) throw attendanceResult.error;
 
     // Load sessions from the JSON file
     const response = await fetch('/src/data/combined_sessions.json');
@@ -87,32 +119,39 @@ export const loadState = async (): Promise<AppState | null> => {
       }
     }));
 
-    // Initialize with empty state if no data exists
-    const state = stateResult.data?.state || {
-      sessions: [],
-      attendance: [],
-      notes: []
-    };
+    // Transform notes from database format to app format
+    const notes = notesResult.data?.map(note => ({
+      id: note.id,
+      sessionId: note.session_id,
+      memberId: note.member_id,
+      content: note.content,
+      createdAt: note.created_at,
+      updatedAt: note.updated_at
+    })) || [];
+
+    // Transform attendance from database format to app format
+    const attendance = attendanceResult.data?.map(record => ({
+      sessionId: record.session_id,
+      memberId: record.member_id
+    })) || [];
 
     // Combine built-in sessions with custom sessions
-    const allSessions = [
-      ...sessions,
-      ...(state.sessions || [])
-    ];
+    const customSessions = stateResult.data?.state?.sessions || [];
+    const allSessions = [...sessions, ...customSessions];
 
     return {
       sessions: allSessions,
-      attendance: state.attendance || [],
-      notes: state.notes || [],
-      team: teamResult.data || []
+      team: teamResult.data || [],
+      notes,
+      attendance
     };
   } catch (error) {
     console.error('Error loading state:', error);
     return {
       sessions: [],
-      attendance: [],
+      team: [],
       notes: [],
-      team: []
+      attendance: []
     };
   }
 };
