@@ -6,7 +6,6 @@ import { generateId } from '../utils/helpers';
 import { teamColors, getNextAvailableColor } from '../utils/teamColors';
 import { UserPlus, Users, X, Edit, Save, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { saveTeamMember, deleteTeamMember } from '../utils/supabase';
 
 export const TeamManager: React.FC = () => {
   const { state, dispatch } = useAppContext();
@@ -37,7 +36,6 @@ export const TeamManager: React.FC = () => {
         color: colorObj.name,
       };
       
-      await saveTeamMember(member);
       dispatch({ type: 'ADD_TEAM_MEMBER', payload: member });
       setNewMember({ name: '', role: '', avatar: '' });
       setIsAdding(false);
@@ -60,7 +58,6 @@ export const TeamManager: React.FC = () => {
         avatar: newMember.avatar || member.avatar,
       };
       
-      await saveTeamMember(updatedMember);
       dispatch({ type: 'UPDATE_TEAM_MEMBER', payload: updatedMember });
       setNewMember({ name: '', role: '', avatar: '' });
       setEditingId(null);
@@ -74,7 +71,6 @@ export const TeamManager: React.FC = () => {
     try {
       if (confirm('Are you sure you want to remove this team member? This action cannot be undone.')) {
         setError(null);
-        await deleteTeamMember(id);
         dispatch({ type: 'REMOVE_TEAM_MEMBER', payload: id });
       }
     } catch (err) {
