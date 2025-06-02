@@ -17,8 +17,9 @@ export const saveState = async (state: AppState) => {
       .upsert({ 
         id: 'main', 
         state: {
-          ...state,
-          team: [] // Team is now stored separately
+          sessions: state.sessions,
+          attendance: state.attendance,
+          notes: state.notes
         }
       });
     
@@ -35,7 +36,6 @@ export const loadState = async (): Promise<AppState | null> => {
         .from('app_state')
         .select('state')
         .eq('id', 'main')
-        .limit(1)
         .single(),
       supabase
         .from('team_members')
@@ -43,20 +43,34 @@ export const loadState = async (): Promise<AppState | null> => {
         .order('created_at', { ascending: true })
     ]);
 
-    if (stateResult.error) throw stateResult.error;
+    if (stateResult.error && stateResult.error.code !== 'PGRST116') {
+      // PGRST116 means no rows returned - that's okay for first load
+      throw stateResult.error;
+    }
     if (teamResult.error) throw teamResult.error;
 
-    const state = stateResult.data?.state || {};
+    // Initialize with empty state if no data exists
+    const state = stateResult.data?.state || {
+      sessions: [],
+      attendance: [],
+      notes: []
+    };
+
     return {
-      ...state,
-      team: teamResult.data || [],
-      attendance: state.attendance || [],
       sessions: state.sessions || [],
-      notes: state.notes || []
+      attendance: state.attendance || [],
+      notes: state.notes || [],
+      team: teamResult.data || []
     };
   } catch (error) {
     console.error('Error loading state:', error);
-    return null;
+    // Return empty initial state on error
+    return {
+      sessions: [],
+      attendance: [],
+      notes: [],
+      team: []
+    };
   }
 };
 
